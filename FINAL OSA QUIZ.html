@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Tầm Soát OSA – Giacnguviet</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f5f7fa;
+  --white:#ffffff;
+  --surface:#f0f4f8;
+  --border:#dde4ed;
+  --border-focus:#3b82f6;
+  --text:#0f1f3a;
+  --dim:#6b84a0;
+  --blue:#2563eb;
+  --blue-lt:#eff4ff;
+  --blue-md:#dbeafe;
+  --red:#dc2626;
+  --red-lt:#fff1f1;
+  --red-md:#fee2e2;
+  --amber:#d97706;
+  --amber-lt:#fffbeb;
+  --amber-md:#fef3c7;
+  --green:#16a34a;
+  --green-lt:#f0fdf4;
+  --green-md:#dcfce7;
+  --r:14px;
+  --shadow:0 2px 12px rgba(15,31,58,.08);
+  --shadow-md:0 6px 24px rgba(15,31,58,.12);
+  --font:'Montserrat',sans-serif;
+}
+
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{display:flex;align-items:flex-start;justify-content:center;padding:0;min-height:100vh}
+
+/* subtle bg pattern */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 80% 10%,rgba(37,99,235,.05) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 10% 90%,rgba(22,163,74,.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+#app{position:relative;z-index:1;width:100%;max-width:500px;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;flex:1;animation:si .32s cubic-bezier(.22,.85,.25,1) both}
+.screen.active{display:flex}
+@keyframes si{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ START ══ */
+.s-wrap{padding:36px 24px 0;flex:1}
+
+.brand-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:99px;background:var(--blue-lt);border:1px solid var(--blue-md);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:28px}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+h1.hero{font-size:clamp(20px,5.5vw,27px);font-weight:900;line-height:1.25;letter-spacing:-.02em;color:var(--text);margin-bottom:14px}
+h1.hero span{color:var(--blue)}
+
+.s-desc{font-size:14px;line-height:1.75;color:var(--dim);margin-bottom:28px}
+.s-desc strong{color:var(--text);font-weight:700}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
+.sc-v{font-size:20px;font-weight:900;color:var(--blue);display:block;line-height:1}
+.sc-l{font-size:10px;color:var(--dim);margin-top:4px;display:block;line-height:1.4;font-weight:500}
+
+.sep{height:1px;background:var(--border);margin:0 0 24px}
+
+.trust-row{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:24px;font-weight:500}
+
+/* BUTTONS */
+.btn-main{display:block;width:100%;padding:16px 20px;background:var(--blue);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-align:center;border:none;border-radius:var(--r);cursor:pointer;transition:transform .13s,box-shadow .13s,background .12s;text-transform:uppercase;box-shadow:0 4px 16px rgba(37,99,235,.25)}
+.btn-main:hover{background:#1d4ed8;box-shadow:0 6px 24px rgba(37,99,235,.32)}
+.btn-main:active{transform:scale(.97)}
+
+.btn-sub{display:block;width:100%;padding:14px 20px;background:var(--white);color:var(--dim);font-family:var(--font);font-size:13px;font-weight:600;text-align:center;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:border-color .13s,color .13s;margin-top:10px;letter-spacing:.02em}
+.btn-sub:hover{border-color:#a3b8d4;color:var(--text)}
+
+/* ══ PROGRESS ══ */
+.prog-wrap{padding:20px 24px 0;flex-shrink:0;background:var(--white);border-bottom:1px solid var(--border)}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-top span{font-size:11.5px;font-weight:700;color:var(--dim);letter-spacing:.04em}
+.prog-top .pct{color:var(--blue);font-weight:800}
+.prog-track{height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* ══ QUESTION ══ */
+.q-wrap{padding:24px 24px 0;flex:1;display:flex;flex-direction:column}
+
+.q-chip{font-size:11px;font-weight:800;letter-spacing:.09em;color:var(--blue);text-transform:uppercase;margin-bottom:10px}
+
+.q-text{font-size:clamp(15px,4vw,17.5px);font-weight:700;line-height:1.55;color:var(--text);margin-bottom:20px}
+
+/* neck note box */
+.neck-note{background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:10px;padding:12px 14px;margin-bottom:18px;display:none}
+.neck-note.show{display:flex;gap:10px;align-items:flex-start}
+.neck-icon{font-size:22px;flex-shrink:0}
+.neck-body{font-size:12px;line-height:1.65;color:#1e40af;font-weight:500}
+.neck-body strong{font-weight:800;display:block;margin-bottom:2px}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:9px}
+
+.opt{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .16s,background .16s,box-shadow .16s,transform .1s;text-align:left;box-shadow:var(--shadow)}
+.opt:hover{border-color:#93bbf7;background:var(--blue-lt);box-shadow:0 2px 16px rgba(37,99,235,.1)}
+.opt:active{transform:scale(.985)}
+.opt.sel{border-color:var(--blue);background:var(--blue-lt);box-shadow:0 4px 18px rgba(37,99,235,.14)}
+
+.opt-lbl{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--dim);flex-shrink:0;transition:all .16s;background:var(--surface)}
+.opt.sel .opt-lbl{background:var(--blue);border-color:var(--blue);color:#fff}
+
+.opt-txt{font-size:13.5px;line-height:1.55;color:var(--text);font-weight:500}
+.opt.sel .opt-txt{color:var(--blue);font-weight:700}
+
+/* BACK button */
+.back-btn{display:flex;align-items:center;gap:7px;margin-top:18px;padding:11px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--dim);cursor:pointer;width:fit-content;transition:border-color .13s,color .13s}
+.back-btn:hover{border-color:#a3b8d4;color:var(--text)}
+.back-btn svg{width:16px;height:16px;flex-shrink:0}
+.back-btn.hidden{visibility:hidden;pointer-events:none}
+
+/* ══ FORM ══ */
+.f-wrap{padding:36px 24px 0;flex:1;display:flex;flex-direction:column}
+.f-icon{font-size:40px;margin-bottom:16px}
+.f-wrap h2{font-size:22px;font-weight:900;color:var(--text);margin-bottom:10px;line-height:1.3}
+.f-wrap .f-desc{font-size:14px;line-height:1.7;color:var(--dim);margin-bottom:26px;font-weight:500}
+.f-wrap .f-desc strong{color:var(--text);font-weight:700}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.field input{width:100%;padding:14px 15px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;font-family:var(--font);font-size:15px;font-weight:500;color:var(--text);outline:none;transition:border-color .16s,box-shadow .16s;box-shadow:var(--shadow)}
+.field input::placeholder{color:#b0c4d8;font-weight:400}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.err{font-size:12px;color:var(--red);margin-top:5px;display:none;font-weight:600}
+.err.show{display:block}
+
+.privacy{font-size:12px;color:var(--dim);line-height:1.6;text-align:center;margin:16px 0 22px;font-weight:500}
+
+/* ══ RESULT ══ */
+.r-wrap{padding:0 24px 0;flex:1;display:flex;flex-direction:column}
+
+.r-header{padding:28px 0 20px;border-bottom:1px solid var(--border)}
+
+.r-band{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:14px}
+.r-band.high{background:var(--red-md);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+.r-band.mid{background:var(--amber-md);color:var(--amber);border:1px solid rgba(217,119,6,.2)}
+.r-band.low{background:var(--green-md);color:var(--green);border:1px solid rgba(22,163,74,.2)}
+
+.r-wrap h2{font-size:clamp(16px,4.2vw,20px);font-weight:900;color:var(--text);line-height:1.35;margin-bottom:0}
+
+.score-row{display:flex;align-items:center;gap:16px;padding:18px 0 0}
+.big-num{font-size:58px;font-weight:900;line-height:1}
+.big-num.high{color:var(--red)}
+.big-num.mid{color:var(--amber)}
+.big-num.low{color:var(--green)}
+.score-meta{display:flex;flex-direction:column;gap:4px}
+.score-max{font-size:16px;color:var(--dim);font-weight:600}
+
+/* gauge */
+.gauge-wrap{padding:20px 0 0}
+.gauge-label{font-size:10.5px;font-weight:700;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.gauge-track{height:10px;background:var(--border);border-radius:99px;overflow:hidden;position:relative}
+.gauge-fill{height:100%;border-radius:99px;transition:width .9s cubic-bezier(.4,0,.2,1) .2s}
+.gauge-fill.high{background:linear-gradient(90deg,#f59e0b,#dc2626)}
+.gauge-fill.mid{background:linear-gradient(90deg,#fbbf24,#d97706)}
+.gauge-fill.low{background:linear-gradient(90deg,#4ade80,#16a34a)}
+.gauge-markers{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--dim);font-weight:600}
+
+.r-body{padding:20px 0 0}
+.r-card{border-radius:var(--r);padding:16px 18px;margin-bottom:12px;border:1px solid}
+.r-card.high{background:var(--red-lt);border-color:rgba(220,38,38,.15)}
+.r-card.mid{background:var(--amber-lt);border-color:rgba(217,119,6,.15)}
+.r-card.low{background:var(--green-lt);border-color:rgba(22,163,74,.15)}
+.r-card p{font-size:13.5px;line-height:1.75;color:var(--text);font-weight:500}
+
+.expert-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:22px;box-shadow:var(--shadow)}
+.exp-tag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:7px}
+.expert-box p{font-size:13px;line-height:1.75;color:var(--dim);font-weight:500}
+
+.cta-stack{display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+
+.btn-cta{display:block;width:100%;padding:15px 18px;border-radius:var(--r);font-family:var(--font);font-size:13.5px;font-weight:800;letter-spacing:.04em;text-align:center;border:none;cursor:pointer;text-transform:uppercase;transition:transform .11s,box-shadow .13s}
+.btn-cta:active{transform:scale(.97)}
+.btn-cta.red{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(220,38,38,.22)}
+.btn-cta.red:hover{box-shadow:0 6px 22px rgba(220,38,38,.32)}
+.btn-cta.amber{background:var(--amber);color:#fff;box-shadow:0 4px 16px rgba(217,119,6,.22)}
+.btn-cta.amber:hover{box-shadow:0 6px 22px rgba(217,119,6,.32)}
+.btn-cta.green{background:var(--green);color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.2)}
+.btn-cta.green:hover{box-shadow:0 6px 22px rgba(22,163,74,.3)}
+.btn-cta.outline{background:var(--white);border:1.5px solid var(--border);color:var(--dim);font-weight:700}
+.btn-cta.outline:hover{border-color:#a3b8d4;color:var(--text)}
+
+/* breakdown */
+.breakdown{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:24px;box-shadow:var(--shadow)}
+.bk-head{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+.bk-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.bk-row:last-child{border-bottom:none}
+.bk-q{font-size:12px;color:var(--dim);flex:1;font-weight:600}
+.bk-bar{flex:0 0 80px;height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+.bk-bar-fill{height:100%;border-radius:99px}
+.bk-bar-fill.c0{background:#4ade80;width:0%}
+.bk-bar-fill.c1{background:#fbbf24;width:50%}
+.bk-bar-fill.c2{background:#f87171;width:100%}
+.bk-pts{font-size:11.5px;font-weight:800;color:var(--text);flex-shrink:0;width:28px;text-align:right}
+
+/* footer */
+.r-footer{border-top:1px solid var(--border);padding:20px 0 32px}
+.rf-brand{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px}
+.rf-info{display:flex;flex-direction:column;gap:3px}
+.rf-info span{font-size:11.5px;color:var(--dim);font-weight:500}
+
+/* padding bottom for last screen */
+.pb{padding-bottom:40px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ START ══ -->
+<div class="screen active" id="screen-start">
+  <div class="s-wrap">
+    <div class="brand-badge"><div class="dot-live"></div>Tầm soát giấc ngủ</div>
+    <h1 class="hero">Bạn có đang ngủ ngáy to?<br><span>Test nhanh nguy cơ OSA!</span></h1>
+    <p class="s-desc">Tiếng ngáy hằng đêm có thể là "tiếng kêu cứu" của cơ thể do thiếu oxy não. Chỉ mất <strong>1 phút</strong> với <strong>8 câu hỏi</strong> chuẩn y khoa (thang điểm STOP-BANG) để tầm soát sức khỏe giấc ngủ của bạn và gia đình.</p>
+    <div class="stat-row">
+      <div class="stat-card"><span class="sc-v">8</span><span class="sc-l">Câu hỏi chuẩn y khoa</span></div>
+      <div class="stat-card"><span class="sc-v">3</span><span class="sc-l">Mức độ mỗi câu</span></div>
+      <div class="stat-card"><span class="sc-v">Free</span><span class="sc-l">Tư vấn bác sĩ</span></div>
+    </div>
+    <div class="sep"></div>
+    <div class="trust-row">
+      <span>⭐</span>
+      <span>Dựa trên thang điểm STOP-BANG kiểm chứng lâm sàng quốc tế – thang điểm 3 mức cho độ chính xác cao hơn.</span>
+    </div>
+  </div>
+  <div style="padding:0 24px 36px">
+    <button class="btn-main" onclick="startTest()">BẮT ĐẦU KIỂM TRA NGAY</button>
+    <button class="btn-sub" onclick="window.open('https://giacnguviet.com.vn','_blank')">Tìm hiểu thêm về Giacnguviet.com.vn</button>
+  </div>
+</div>
+
+<!-- ══ QUESTION ══ -->
+<div class="screen" id="screen-question">
+  <div class="prog-wrap">
+    <div class="prog-top">
+      <span id="q-counter">Câu 1 / 8</span>
+      <span class="pct" id="q-pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="q-wrap">
+    <div class="q-chip" id="q-chip">S — SNORING</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="neck-note" id="neck-note">
+      <div class="neck-icon">📏</div>
+      <div class="neck-body">
+        <strong>Cách đo vòng cổ tại nhà:</strong>
+        Dùng thước dây, đo vòng quanh cổ ngang nếp gấp tự nhiên của cổ (vị trí cổ áo thông thường). Giữ thước nằm ngang, không kéo căng.<br><strong style="margin-top:4px;display:block">Ngưỡng OSA cần lưu ý: Nam &gt; 43 cm &nbsp;|&nbsp; Nữ &gt; 40 cm</strong>
+      </div>
+    </div>
+    <div class="opts" id="opts"></div>
+    <button class="back-btn hidden" id="back-btn" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Quay lại câu trước
+    </button>
+  </div>
+</div>
+
+<!-- ══ FORM ══ -->
+<div class="screen" id="screen-form">
+  <div class="f-wrap">
+    <div class="f-icon">📋</div>
+    <h2>Kết quả của bạn đã sẵn sàng!</h2>
+    <p class="f-desc">Vui lòng để lại thông tin để hệ thống phân tích và gửi kết quả chi tiết kèm <strong>tư vấn phác đồ điều trị miễn phí</strong> từ Bác sĩ chuyên khoa hô hấp.</p>
+    <div class="field">
+      <label>Họ và tên</label>
+      <input type="text" id="inp-name" placeholder="Nguyễn Văn A">
+      <div class="err" id="err-name">Vui lòng nhập họ tên của bạn.</div>
+    </div>
+    <div class="field">
+      <label>Số điện thoại</label>
+      <input type="tel" id="inp-phone" placeholder="090 328 93 87">
+      <div class="err" id="err-phone">Vui lòng nhập số điện thoại hợp lệ (8–12 số).</div>
+    </div>
+    <div class="privacy">🔒 Thông tin của bạn được bảo mật tuyệt đối.<br>Cody Health cam kết không chia sẻ dữ liệu với bên thứ ba.</div>
+    <button class="btn-main" onclick="submitForm()">XEM KẾT QUẢ ĐÁNH GIÁ →</button>
+  </div>
+</div>
+
+<!-- ══ RESULT ══ -->
+<div class="screen" id="screen-result">
+  <div class="r-wrap pb" id="r-wrap"></div>
+</div>
+
+</div>
+
+<script>
+const QS=[
+  {chip:'S — SNORING',text:'Bạn có thường xuyên ngáy khi ngủ không, và âm lượng tiếng ngáy như thế nào?',neck:false,opts:[
+    {l:'A',v:0,t:'Không ngáy hoặc hiếm khi ngáy.'},
+    {l:'B',v:1,t:'Thỉnh thoảng ngáy, tiếng ngáy nhỏ hoặc vừa phải.'},
+    {l:'C',v:2,t:'Ngáy rất thường xuyên, tiếng ngáy rất to (người ở phòng bên cạnh cũng nghe thấy).'}
+  ]},
+  {chip:'T — TIRED',text:'Bạn có cảm thấy mệt mỏi, uể oải hay buồn ngủ quá mức vào ban ngày không (dù đêm qua đã ngủ đủ giờ)?',neck:false,opts:[
+    {l:'A',v:0,t:'Luôn tỉnh táo, rất hiếm khi buồn ngủ ban ngày.'},
+    {l:'B',v:1,t:'Thỉnh thoảng thấy uể oải, mất tập trung vào giữa ngày.'},
+    {l:'C',v:2,t:'Rất hay buồn ngủ, mệt mỏi rã rời ảnh hưởng nghiêm trọng đến công việc / lái xe.'}
+  ]},
+  {chip:'O — OBSERVED',text:'Người nhà hoặc người ngủ cùng có bao giờ nhận thấy bạn có biểu hiện bất thường về nhịp thở lúc ngủ chưa?',neck:false,opts:[
+    {l:'A',v:0,t:'Chưa từng có ai thấy tôi bị ngừng thở hay sặc nghẹn lúc ngủ.'},
+    {l:'B',v:1,t:'Thỉnh thoảng có nhịp thở gấp, trằn trọc hoặc ngáy ngắt quãng.'},
+    {l:'C',v:2,t:'Đã có người tận mắt thấy tôi bị ngừng thở, sặc nghẹn hoặc thở hổn hển lúc ngủ.'}
+  ]},
+  {chip:'P — PRESSURE',text:'Tình trạng huyết áp hiện tại của bạn như thế nào?',neck:false,opts:[
+    {l:'A',v:0,t:'Huyết áp hoàn toàn bình thường.'},
+    {l:'B',v:1,t:'Huyết áp ở mức ranh giới (tiền cao huyết áp), thỉnh thoảng tăng nhưng chưa dùng thuốc.'},
+    {l:'C',v:2,t:'Đang bị Cao huyết áp và/hoặc đang phải uống thuốc điều trị hàng ngày.'}
+  ]},
+  {chip:'B — BMI',text:'Tình trạng cân nặng của bạn đang ở mức nào? (BMI = Cân nặng (kg) ÷ [Chiều cao (m)]²)',neck:false,opts:[
+    {l:'A',v:0,t:'Cân đối, bình thường (BMI dưới 23 – Chuẩn người Á Đông).'},
+    {l:'B',v:1,t:'Thừa cân nhẹ (BMI từ 23 đến 29.9).'},
+    {l:'C',v:2,t:'Béo phì (BMI từ 30 trở lên).'}
+  ]},
+  {chip:'A — AGE',text:'Bạn đang ở nhóm độ tuổi nào?',neck:false,opts:[
+    {l:'A',v:0,t:'Dưới 40 tuổi.'},
+    {l:'B',v:1,t:'Từ 40 – 50 tuổi.'},
+    {l:'C',v:2,t:'Trên 50 tuổi (Nhóm có nguy cơ thoái hóa cơ vùng hầu họng cao).'}
+  ]},
+  {chip:'N — NECK',text:'Vòng cổ của bạn có lớn không? (Mỡ thừa vùng cổ có thể chèn ép đường thở).',neck:true,opts:[
+    {l:'A',v:0,t:'Cổ thon gọn, bình thường.'},
+    {l:'B',v:1,t:'Cổ hơi to, có nọng cằm, thỉnh thoảng mặc áo cài nút cổ thấy chật.'},
+    {l:'C',v:2,t:'Vòng cổ rất lớn (Chu vi > 43 cm đối với nam, hoặc > 40 cm đối với nữ).'}
+  ]},
+  {chip:'G — GENDER',text:'Giới tính của bạn là gì? (Nội tiết tố nam và sự sụt giảm nội tiết tố nữ thời kỳ mãn kinh làm tăng nguy cơ OSA).',neck:false,opts:[
+    {l:'A',v:0,t:'Nữ giới (Chưa mãn kinh).'},
+    {l:'B',v:1,t:'Nữ giới (Đã mãn kinh).'},
+    {l:'C',v:2,t:'Nam giới.'}
+  ]}
+];
+
+const Q_LABELS=['Ngáy','Mệt mỏi','Quan sát','Huyết áp','BMI','Tuổi','Vòng cổ','Giới tính'];
+
+let cur=0,answers=[],score=0,transitioning=false;
+
+function pushEvent(n,p){window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:n,...p});}
+
+function showScreen(id){
+  if(transitioning)return;
+  transitioning=true;
+  const active=document.querySelector('.screen.active');
+  if(active){
+    active.style.opacity=0;active.style.transform='translateX(-18px)';active.style.transition='opacity .2s,transform .2s';
+    setTimeout(()=>{
+      active.style.cssText='';active.classList.remove('active');
+      const next=document.getElementById('screen-'+id);
+      next.classList.add('active');
+      next.scrollTop=0;
+      setTimeout(()=>{transitioning=false;},50);
+    },200);
+  } else {
+    document.getElementById('screen-'+id).classList.add('active');
+    transitioning=false;
+  }
+}
+
+function startTest(){
+  pushEvent('view_test',{});
+  cur=0;answers=[];score=0;
+  loadQ();showScreen('question');
+}
+
+function loadQ(){
+  const q=QS[cur];
+  const pct=Math.round((cur/8)*100);
+  document.getElementById('q-counter').textContent=`Câu ${cur+1} / 8`;
+  document.getElementById('q-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('q-chip').textContent=q.chip;
+  document.getElementById('q-text').textContent=q.text;
+
+  // neck note
+  const nn=document.getElementById('neck-note');
+  nn.classList.toggle('show',q.neck);
+
+  // back button
+  const bb=document.getElementById('back-btn');
+  bb.classList.toggle('hidden',cur===0);
+
+  // options
+  const grid=document.getElementById('opts');
+  grid.innerHTML='';
+  q.opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="opt-lbl">${opt.l}</span><span class="opt-txt">${opt.t}</span>`;
+    btn.onclick=()=>pick(opt.v,btn);
+    grid.appendChild(btn);
+  });
+}
+
+function pick(val,btn){
+  if(transitioning)return;
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  setTimeout(()=>{
+    answers[cur]=val;
+    score=answers.reduce((a,b)=>a+(b||0),0);
+    if(cur===3) pushEvent('test_progress',{progress:'50%'});
+    cur++;
+    if(cur<8){loadQ();}
+    else{
+      document.getElementById('prog-fill').style.width='100%';
+      document.getElementById('q-counter').textContent='8 / 8';
+      document.getElementById('q-pct').textContent='100%';
+      setTimeout(()=>showScreen('form'),220);
+    }
+  },280);
+}
+
+function goBack(){
+  if(cur<=0||transitioning)return;
+  cur--;
+  // remove last answer
+  if(answers.length>cur) answers.splice(cur,1);
+  score=answers.reduce((a,b)=>a+(b||0),0);
+  loadQ();
+}
+
+function submitForm(){
+  const name=document.getElementById('inp-name').value.trim();
+  const phone=document.getElementById('inp-phone').value.trim();
+  let ok=true;
+  document.getElementById('err-name').classList.remove('show');
+  document.getElementById('err-phone').classList.remove('show');
+  if(!name){document.getElementById('err-name').classList.add('show');ok=false;}
+  if(!phone||!/^[0-9\s\-\+]{8,15}$/.test(phone)){document.getElementById('err-phone').classList.add('show');ok=false;}
+  if(!ok)return;
+
+  const risk=score>=11?'Cao':score>=6?'Trung bình':'Thấp';
+  pushEvent('submit_form',{name,phone,total_score:score,risk_level:risk});
+
+  // Google Sheets endpoint – replace YOUR_SCRIPT_ID
+  fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',{
+    method:'POST',mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,phone,score,risk,answers,timestamp:new Date().toISOString()})
+  }).catch(()=>{});
+
+  showResult();
+}
+
+function showResult(){
+  const risk=score>=11?'high':score>=6?'mid':'low';
+  const riskLabel={high:'Cao',mid:'Trung bình',low:'Thấp'}[risk];
+  pushEvent('view_result',{risk_level:riskLabel,total_score:score});
+
+  const cfg={
+    high:{
+      band:'🔴 NGUY CƠ RẤT CAO',
+      title:'BÁO ĐỘNG ĐỎ! Các chỉ số cho thấy đường thở của bạn đang bị tắc nghẽn nghiêm trọng hằng đêm.',
+      body:'Não bộ và các cơ quan đang phải chịu đựng tình trạng thiếu oxy trầm trọng, đẩy bạn vào nhóm có nguy cơ cực cao đột quỵ và nhồi máu cơ tim ngay trong giấc ngủ.',
+      expert:'Đây là tình trạng y khoa khẩn cấp! Bạn cần thực hiện "Tiêu chuẩn vàng" là Đo đa ký hô hấp ngay lập tức để đánh giá mức độ. Các bác sĩ sẽ chỉ định giải pháp can thiệp kịp thời bằng máy trợ thở CPAP/BiPAP của ResMed để bảo vệ tính mạng của bạn hằng đêm.',
+      ctas:[
+        {l:'ĐẶT LỊCH ĐO ĐA KÝ HÔ HẤP TẠI NHÀ',c:'red',h:'tel:0903289387'},
+        {l:'TÌM HIỂU MÁY TRỢ THỞ RESMED',c:'outline',h:'https://giacnguviet.com.vn'}
+      ]
+    },
+    mid:{
+      band:'🟡 NGUY CƠ TRUNG BÌNH',
+      title:'LƯU Ý! Bạn đang ở ngưỡng cảnh báo. Cơ thể đã bắt đầu xuất hiện dấu hiệu chật hẹp đường thở khi ngủ.',
+      body:'Tình trạng thiếu oxy nhẹ đang âm thầm khiến bạn mệt mỏi và làm suy giảm chất lượng cuộc sống, hiệu suất làm việc và hệ miễn dịch.',
+      expert:'Hãy kết nối ngay với bác sĩ chuyên khoa hô hấp để nhận tư vấn miễn phí, ngăn chặn bệnh tiến triển nặng hơn gây ảnh hưởng tim mạch.',
+      ctas:[{l:'NHẬN TƯ VẤN TỪ BÁC SĨ CHUYÊN KHOA',c:'amber',h:'tel:0903289387'}]
+    },
+    low:{
+      band:'🟢 NGUY CƠ THẤP',
+      title:'TIN VUI! Bạn hiện có nguy cơ rất thấp mắc Hội chứng ngưng thở khi ngủ.',
+      body:'Đường thở của bạn hoạt động ổn định trong đêm. Tuy nhiên, nếu vẫn thường xuyên thấy mệt mỏi hoặc bị ngáy, nguyên nhân có thể đến từ căng thẳng hoặc các bệnh lý mũi họng thông thường.',
+      expert:'Hãy duy trì lối sống lành mạnh, ăn uống khoa học và kiểm soát cân nặng tốt. Tiếp tục theo dõi chất lượng giấc ngủ định kỳ.',
+      ctas:[{l:'ĐỌC THÊM KIẾN THỨC CHĂM SÓC GIẤC NGỦ',c:'green',h:'https://giacnguviet.com.vn'}]
+    }
+  };
+
+  const c=cfg[risk];
+  const gPct=Math.round((score/16)*100);
+
+  const bkRows=answers.map((v,i)=>`
+    <div class="bk-row">
+      <span class="bk-q">${Q_LABELS[i]}</span>
+      <div class="bk-bar"><div class="bk-bar-fill c${v}"></div></div>
+      <span class="bk-pts">+${v} đ</span>
+    </div>`).join('');
+
+  const ctaHTML=c.ctas.map(x=>`<button class="btn-cta ${x.c}" onclick="window.open('${x.h}','_blank')">${x.l}</button>`).join('');
+
+  document.getElementById('r-wrap').innerHTML=`
+    <div class="r-header">
+      <div class="r-band ${risk}">${c.band}</div>
+      <h2>${c.title}</h2>
+      <div class="score-row">
+        <span class="big-num ${risk}">${score}</span>
+        <div class="score-meta">
+          <span class="score-max">/ 16 điểm</span>
+        </div>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-label">Mức độ nguy cơ</div>
+        <div class="gauge-track"><div class="gauge-fill ${risk}" id="gf" style="width:0%"></div></div>
+        <div class="gauge-markers"><span>0</span><span>6</span><span>11</span><span>16</span></div>
+      </div>
+    </div>
+    <div class="r-body">
+      <div class="r-card ${risk}"><p>${c.body}</p></div>
+      <div class="expert-box"><div class="exp-tag">💡 Lời khuyên từ chuyên gia</div><p>${c.expert}</p></div>
+      <div class="cta-stack">
+        ${ctaHTML}
+        <button class="btn-cta outline" onclick="startTest()">Làm lại bài kiểm tra</button>
+      </div>
+      <div class="breakdown">
+        <div class="bk-head">Chi tiết từng câu trả lời</div>
+        ${bkRows}
+      </div>
+      <div class="r-footer">
+        <div class="rf-brand">CÔNG TY CỔ PHẦN CODY HEALTH</div>
+        <div class="rf-info">
+          <span>📍 Phòng 6.28, 290 An Dương Vương, Q5, TP.HCM</span>
+          <span>🌐 giacnguviet.com.vn</span>
+          <span>☎ 090 328 93 87 &nbsp;|&nbsp; 📧 hotro@giacnguviet.com.vn</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  showScreen('result');
+  setTimeout(()=>{const g=document.getElementById('gf');if(g)g.style.width=gPct+'%';},500);
+}
+</script>
+</body>
+</html>
